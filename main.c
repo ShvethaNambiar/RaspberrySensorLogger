@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <pigpio.h>
+#include <stdlib.h>
+#include "spiSensor.h"
+#include "logger.h"
+
+void initialize_main(){
+    if (gpioInitialise() < 0) {
+        // Initialization failed
+        fprintf(stderr, "Pigpio initialization failed\n");
+        exit(EXIT_FAILURE);
+    }
+    //send first adxl spi message to start measurement
+    adxl345_init();
+}
+int main() {
+    initialize_main();
+
+    pthread_t t1, t2;
+    
+    // Spin up the threads
+    pthread_create(&t1, NULL, sensor_spi_thread, NULL);
+    pthread_create(&t2, NULL, logging_thread, NULL);
+    
+    // Let them run infinitely
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    
+    return 0;
+}

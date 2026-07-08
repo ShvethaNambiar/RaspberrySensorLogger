@@ -1,0 +1,1 @@
+extern void* logging_thread(void* arg);
