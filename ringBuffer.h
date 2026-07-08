@@ -3,29 +3,23 @@
 
 #include <pthread.h>
 
+typedef enum {
+    ACCELEROMETER,
+    TEMPERATURE,
+    DISTANCE
+} DeviceType;
+
 typedef struct {
+    DeviceType device;
+    long timestamp;
     int x;
     int y;
     int z;
-} AccelerometerData;
-
-typedef struct {
-    float temperature;
-} TemperatureData;
-
-typedef struct {
-    float distance;
-} DistanceData;
-
-typedef struct {
-    AccelerometerData accelData;
-    TemperatureData tempData;
-    DistanceData distanceData;
-} DeviceTypes;
+} PacketData;
 
 // Shared Ring Buffer Structures
 typedef struct {
-    DeviceTypes data[100]; 
+    PacketData data[100]; 
     int head;
     int tail;
     pthread_mutex_t lock;

@@ -17,14 +17,16 @@ void* logging_thread(void* arg) {
     while(1) {
         pthread_mutex_lock(&buffer.lock);
         if (buffer.tail != buffer.head) { 
-            DeviceTypes data_to_log = buffer.data[buffer.tail];
+            PacketData data_to_log = buffer.data[buffer.tail];
             buffer.tail = (buffer.tail + 1) % 100;
             pthread_mutex_unlock(&buffer.lock);
 
-            fprintf(file, "Accelerometer Data: %d, %d, %d, Temperature Data: %.2f, Distance Data: %.2f\n" \
-                data_to_log.accelData.x, data_to_log.accelData.y, data_to_log.accelData.z,\
-                data_to_log.tempData.temperature, \
-                data_to_log.distanceData.distance
+            fprintf(file, "Timestamp: %ld, Device: %s, X: %d, Y: %d, Z: %d\n", \
+                data_to_log.timestamp, 
+                data_to_log.device == ACCELEROMETER ? "Accelerometer" : data_to_log.device == TEMPERATURE ? "Temperature" : "Distance",
+                data_to_log.x, 
+                data_to_log.y, 
+                data_to_log.z
             );
             fflush(file); 
         } else {

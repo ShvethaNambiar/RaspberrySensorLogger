@@ -23,7 +23,7 @@ void adxl345_init(){
     printf("Spi communication to set measurement successful: %d\n",rx_buffer[1]);
 }
 
-AccelerometerData read_adxl345_spi() {
+PacketData read_adxl345_spi() {
     uint8_t tx_buffer[7] = {0xF2,0x0,0x0,0x0,0x0,0x0,0x0}; // Power Control Register 0x11110010 (r/w, multibyte, address which is 0x32)
     uint8_t rx_buffer[7] = {0};
     spiXfer(spi_handle, (char*)tx_buffer, (char*)rx_buffer, 7);
@@ -33,17 +33,17 @@ AccelerometerData read_adxl345_spi() {
     int16_t z = (rx_buffer[6] << 8) | rx_buffer[5]; // DATAZ1 (MSB) and DATAZ0 (LSB)
 
     printf("X: %d | Y: %d | Z: %d\n", x, y, z);
-    return (AccelerometerData){x, y, z}; // Simulated reading for now
+    return (PacketData){ACCELEROMETER, time(NULL), x, y, z}; // Simulated reading for now
 }
 // Producer Thread: Simulating your ADXL345 SPI Sensor
 void* sensor_spi_thread(void* arg) {
     
     while(1) {
-        AccelerometerData simulated_reading = read_adxl345_spi(); 
+        PacketData simulated_reading = read_adxl345_spi(); 
 
         pthread_mutex_lock(&buffer.lock);
         // Push to Ring Buffer
-        buffer.data[buffer.head].accelData = simulated_reading;
+        buffer.data[buffer.head] = simulated_reading;
         buffer.head = (buffer.head + 1) % 100;
         pthread_mutex_unlock(&buffer.lock);
 
